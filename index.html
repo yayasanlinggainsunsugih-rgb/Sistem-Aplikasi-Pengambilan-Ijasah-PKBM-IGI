@@ -7,11 +7,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Desain Khusus untuk Cetak/Print Lembar Bukti */
+        /* Desain Khusus untuk Cetak/Print Seluruh Data Tabel */
         @media print {
-            body * { visibility: hidden; }
-            #printArea, #printArea * { visibility: visible; }
-            #printArea { position: absolute; left: 0; top: 0; width: 100%; }
+            /* Aturan cetak global seluruh tabel jika tombol print navbar ditekan */
+            .print-all-mode * { visibility: hidden; }
+            .print-all-mode #mainContentToPrint, .print-all-mode #mainContentToPrint * { visibility: visible; }
+            .print-all-mode #mainContentToPrint { position: absolute; left: 0; top: 0; width: 100%; }
+            .print-all-mode .block-print, .print-all-mode .action-cell { display: none !important; }
         }
         /* Proporsi Pas Foto 3x4 */
         .foto-3x4 {
@@ -19,12 +21,6 @@
             height: 48px;
             object-fit: cover;
             border-radius: 4px;
-        }
-        .foto-3x4-print {
-            width: 90px;
-            height: 120px;
-            object-fit: cover;
-            border: 1px solid #000;
         }
     </style>
 </head>
@@ -45,8 +41,11 @@
                     <p class="text-xs text-blue-200 font-mono">NPSN: P9984529 | Sistem Arsip Pengambilan Ijazah</p>
                 </div>
             </div>
-            <nav class="flex gap-2 w-full md:w-auto">
-                <input type="text" id="searchInput" placeholder="Cari NISN atau Nama..." class="w-full md:w-64 px-4 py-2 rounded-lg bg-blue-800 text-white placeholder-blue-300 border border-blue-600 focus:outline-none focus:ring-2 focus:ring-white text-sm">
+            <nav class="flex flex-wrap md:flex-nowrap gap-2 w-full md:w-auto">
+                <input type="text" id="searchInput" placeholder="Cari NISN atau Nama..." class="w-full md:w-48 lg:w-64 px-4 py-2 rounded-lg bg-blue-800 text-white placeholder-blue-300 border border-blue-600 focus:outline-none focus:ring-2 focus:ring-white text-sm">
+                <button onclick="printAllData()" class="bg-green-600 hover:bg-green-500 text-white font-semibold px-4 py-2 rounded-lg text-sm flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer shadow-sm" title="Cetak Seluruh Data Tabel Aktif">
+                    <i class="fa-solid fa-print"></i> Cetak <span id="labelTombolPrint">(Paket B)</span>
+                </button>
                 <button onclick="openAddModal()" class="bg-yellow-500 hover:bg-yellow-400 text-blue-950 font-semibold px-4 py-2 rounded-lg text-sm flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer">
                     <i class="fa-solid fa-plus"></i> Tambah Data <span id="labelTombolTambah">(Paket B)</span>
                 </button>
@@ -54,7 +53,7 @@
         </div>
     </header>
 
-    <main class="container mx-auto px-6 py-8 flex-grow">
+    <main id="mainContentToPrint" class="container mx-auto px-6 py-8 flex-grow">
         
         <div class="flex border-b border-gray-200 mb-6 block-print">
             <button id="tabPaketB" onclick="switchPaket('B')" class="py-3 px-6 font-bold text-sm border-b-2 border-blue-600 text-blue-700 flex items-center gap-2 transition-all cursor-pointer">
@@ -65,7 +64,7 @@
             </button>
         </div>
         
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 block-print">
             <div class="text-sm text-gray-600">
                 <span class="font-semibold text-blue-700"><i class="fa-solid fa-database mr-1"></i> Manajemen Data <span id="labelKategoriData" class="font-bold underline">Paket B</span>:</span> 
                 Fitur cadangan, import file, dan kosongkan sistem hanya berdampak pada kategori paket aktif.
@@ -105,11 +104,11 @@
                             <th class="py-4 px-4">Hari & Tanggal Ambil</th>
                             <th class="py-4 px-4">No. Kontak</th>
                             <th class="py-4 px-4 text-center">Bukti Fisik</th>
-                            <th class="py-4 px-4 text-center">Aksi</th>
+                            <th class="py-4 px-4 text-center action-cell">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="ijazahTableBody" class="divide-y divide-gray-100 text-sm text-gray-600">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
             <div id="emptyState" class="hidden text-center py-12 text-gray-400">
@@ -207,41 +206,6 @@
         </div>
     </div>
 
-    <div id="printArea" class="hidden p-12 text-black">
-        <div class="text-center border-b-4 border-double border-black pb-4 mb-6 relative">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png" class="absolute left-2 top-0 h-16 w-16 object-contain" alt="Logo KOP">
-            <h2 class="text-xl font-bold uppercase">PKBM IGI SUMEDANG</h2>
-            <p class="text-sm">Nomor Pokok Sekolah Nasional (NPSN): <b>P9984529</b></p>
-            <p class="text-xs italic text-gray-600">Kabupaten Sumedang, Jawa Barat, Indonesia</p>
-        </div>
-        <h3 class="text-center text-lg font-bold uppercase tracking-wider mb-8 underline">Surat Bukti Pengambilan Ijazah (<span id="p_paket"></span>)</h3>
-        
-        <div class="flex gap-8 items-start mb-8">
-            <div class="shrink-0">
-                <img id="p_foto" src="" class="foto-3x4-print bg-gray-100 flex items-center justify-center">
-            </div>
-            <div class="flex-grow">
-                <p class="mb-4">Yang bertanda tangan di bawah ini menerangkan bahwa dokumen ijazah asli milik siswa berikut:</p>
-                <table class="w-full text-sm">
-                    <tr class="h-8"><td class="w-40 font-semibold">NISN</td><td>: <span id="p_nisn" class="font-mono"></span></td></tr>
-                    <tr class="h-8"><td class="font-semibold">Nama Siswa</td><td>: <b id="p_nama"></b></td></tr>
-                    <tr class="h-8"><td class="font-semibold">Tempat, Tgl Lahir</td><td>: <span id="p_ttl"></span></td></tr>
-                    <tr class="h-8"><td class="font-semibold">Alamat</td><td>: <span id="p_alamat"></span></td></tr>
-                    <tr class="h-8"><td class="font-semibold">Tahun Kelulusan</td><td>: <span id="p_tahun"></span></td></tr>
-                    <tr class="h-8"><td class="font-semibold">Waktu Pengambilan</td><td>: <span id="p_waktu"></span></td></tr>
-                    <tr class="h-8"><td class="font-semibold">No. Kontak Penerima</td><td>: <span id="p_kontak"></span></td></tr>
-                    <tr class="h-8"><td class="font-semibold">Status Bukti Fisik</td><td>: Ditandatangani & Diarsip Digital (<span id="p_file"></span>)</td></tr>
-                </table>
-            </div>
-        </div>
-
-        <p class="mb-12">Telah diambil secara sah dan direkam dalam sistem arsip digital PKBM IGI SUMEDANG.</p>
-        <div class="flex justify-between text-center">
-            <div class="w-48"><p class="mb-16">Siswa/Penerima,</p><p class="border-b border-black w-full"></p></div>
-            <div class="w-50"><p id="p_tgl_ttd">Sumedang, ......</p><p class="mb-16">Petugas PKBM IGI,</p><p class="border-b border-black w-full"></p></div>
-        </div>
-    </div>
-
     <footer class="bg-gray-800 text-gray-400 py-4 text-center text-xs mt-12 border-t border-gray-700 block-print">
         &copy; 2026 PKBM IGI SUMEDANG (NPSN: P9984529). All Rights Reserved.
     </footer>
@@ -249,23 +213,21 @@
     <script>
         const defaultFotoPlaceholder = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a1a1aa'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
 
-        // Status Paket Aktif ('B' atau 'C')
         let paketAktif = 'B';
 
-        // Penampung data terpisah dengan Kolom Tambahan Tempat & Tanggal Lahir (tglLahir memakai format YYYY-MM-DD)
         let dataSistem = {
             'B': JSON.parse(localStorage.getItem('arsip_ijazah_paket_B')) || [
-                { id: 101, nisn: "0081234561", nama: "Mahendra", tempatLahir: "Sumedang", tglLahir: "2009-04-12", alamat: "Jl. Prabu Geusan Ulun No. 12, Sumedang Utara", tahun: "2025", tglAmbil: "2026-05-10", kontak: "081234567890", file: "ijazah_asep_b.pdf", foto: defaultFotoPlaceholder },
-                { id: 102, nisn: "0081234562", nama: "Dedi Setiadi", tempatLahir: "Bandung", tglLahir: "2009-08-24", alamat: "Dusun Cimalaka RT 02 RW 05, Kec. Cimalaka", tahun: "2025", tglAmbil: "2026-05-12", kontak: "082119876543", file: "bukti_ijazah_dedi.png", foto: defaultFotoPlaceholder },
+                { id: 101, nisn: "0081234561", nama: "Asep Sunandar", tempatLahir: "Sumedang", tglLahir: "2009-04-12", alamat: "Jl. Prabu Geusan Ulun No. 12, Sumedang Utara", tahun: "2024", tglAmbil: "2026-05-10", kontak: "081234567890", file: "ijazah_asep_b.pdf", foto: defaultFotoPlaceholder },
+                { id: 102, nisn: "0081234562", nama: "Dedi Setiadi", tempatLahir: "Bandung", tglLahir: "2009-08-24", alamat: "Dusun Cimalaka RT 02 RW 05, Kec. Cimalaka", tahun: "2024", tglAmbil: "2026-05-12", kontak: "082119876543", file: "bukti_ijazah_dedi.png", foto: defaultFotoPlaceholder },
                 { id: 103, nisn: "0092345673", nama: "Cecep Hernawan", tempatLahir: "Sumedang", tglLahir: "2010-01-03", alamat: "Kp. Jatinangor No. 45, Kec. Jatinangor", tahun: "2025", tglAmbil: "2026-05-20", kontak: "085223445566", file: "scan_ijazah_cecep.pdf", foto: defaultFotoPlaceholder },
                 { id: 104, nisn: "0092345674", nama: "Fitriani Handayani", tempatLahir: "Majalengka", tglLahir: "2010-11-15", alamat: "Desa Situraja Utara, Kec. Situraja", tahun: "2025", tglAmbil: "2026-06-01", kontak: "087823451122", file: "arsip_fitriani_b.jpg", foto: defaultFotoPlaceholder },
-                { id: 105, nisn: "0083456785", nama: "Iis Dahlia Sumedang", tempatLahir: "Sumedang", tglLahir: "2009-07-30", alamat: "Perum Angkrek Situ Blok C, Sumedang Selatan", tahun: "2025", tglAmbil: "2026-06-04", kontak: "089654321098", file: "ijazah_iis_dahlia.pdf", foto: defaultFotoPlaceholder }
+                { id: 105, nisn: "0083456785", nama: "Iis Dahlia Sumedang", tempatLahir: "Sumedang", tglLahir: "2009-07-30", alamat: "Perum Angkrek Situ Blok C, Sumedang Selatan", tahun: "2024", tglAmbil: "2026-06-04", kontak: "089654321098", file: "ijazah_iis_dahlia.pdf", foto: defaultFotoPlaceholder }
             ],
             'C': JSON.parse(localStorage.getItem('arsip_ijazah_paket_C')) || [
                 { id: 201, nisn: "0106060138", nama: "Asep Tedi Mulyono", tempatLahir: "Sumedang", tglLahir: "2010-02-12", alamat: "Kec. Paseh, Kabupaten Sumedang", tahun: "2025", tglAmbil: "2026-04-15", kontak: "085798765432", file: "ijazah_asep tedi_c.jpg", foto: defaultFotoPlaceholder },
-                { id: 202, nisn: "0063853186", nama: "Salsa Bilahi", tempatLahir: "Sumedang", tglLahir: "2006-09-02", alamat: "Dusun Lebakhuni, Kec. Sumedang Selatan", tahun: "2025", tglAmbil: "2026-06-06", kontak: "082114228790", file: "salsa_sma.pdf", foto: defaultFotoPlaceholder },
-                { id: 203, nisn: "0058765433", nama: "Agus Rustandi", tempatLahir: "Sumedang", tglLahir: "2006-12-09", alamat: "Jl. Mayor Abdurahman No. 88, Kotakulon", tahun: "2025", tglAmbil: "2026-05-18", kontak: "082214556677", file: "ijazah_asli_agus.png", foto: defaultFotoPlaceholder },
-                { id: 204, nisn: "0068765434", nama: "Neng Lilis Karlina", tempatLahir: "Sumedang", tglLahir: "2007-10-25", alamat: "Kp. Buahdua RT 01 RW 03, Kec. Buahdua", tahun: "2025", tglAmbil: "2026-06-02", kontak: "085311223344", file: "lilis_karlina_c.pdf", foto: defaultFotoPlaceholder },
+                { id: 202, nisn: "0063853186", nama: "Salsa Bilahi", tempatLahir: "Sumedang", tglLahir: "2006-09-02", alamat: "Dusun Lebakhuni, Kec. Sumedang Selatan", tahun: "2024", tglAmbil: "2026-06-06", kontak: "082114228790", file: "salsa_sma.pdf", foto: defaultFotoPlaceholder },
+                { id: 203, nisn: "0058765433", nama: "Agus Rustandi", tempatLahir: "Sumedang", tglLahir: "2006-12-09", alamat: "Jl. Mayor Abdurahman No. 88, Kotakulon", tahun: "2023", tglAmbil: "2026-05-18", kontak: "082214556677", file: "ijazah_asli_agus.png", foto: defaultFotoPlaceholder },
+                { id: 204, font: "0068765434", nama: "Neng Lilis Karlina", tempatLahir: "Sumedang", tglLahir: "2007-10-25", alamat: "Kp. Buahdua RT 01 RW 03, Kec. Buahdua", tahun: "2025", tglAmbil: "2026-06-02", kontak: "085311223344", file: "lilis_karlina_c.pdf", foto: defaultFotoPlaceholder },
                 { id: 205, nisn: "0069876545", nama: "Wawan Hermawan", tempatLahir: "Sumedang", tglLahir: "2007-03-18", alamat: "Desa Conggeang Kulon, Kec. Conggeang", tahun: "2025", tglAmbil: "2026-06-05", kontak: "087788990011", file: "wawan_hermawan_c.jpg", foto: defaultFotoPlaceholder }
             ]
         };
@@ -273,7 +235,6 @@
         let fileTerpilihNama = "";
         let fotoBase64Data = defaultFotoPlaceholder;
 
-        // Fungsi Memformat Tanggal Lahir (Tanpa Hari)
         function formatTanggalSaja(dateString) {
             if (!dateString) return "-";
             const date = new Date(dateString);
@@ -281,7 +242,6 @@
             return `${date.getDate()} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
         }
 
-        // Fungsi Memformat Hari dan Tanggal Ambil Bahasa Indonesia
         function formatHariTanggal(dateString) {
             if (!dateString) return "-";
             const date = new Date(dateString);
@@ -290,7 +250,6 @@
             return `${hari[date.getDay()]}, ${date.getDate()} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
         }
 
-        // Fungsi Beralih Navbar Paket B & Paket C
         function switchPaket(paket) {
             paketAktif = paket;
             
@@ -305,17 +264,16 @@
                 tabB.className = "py-3 px-6 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-blue-600 hover:border-gray-300 flex items-center gap-2 transition-all cursor-pointer";
             }
 
-            // Update Semua Label Tampilan UI
             document.getElementById('labelTabelPaket').innerText = `Paket ${paket}`;
             document.getElementById('labelKategoriData').innerText = `Paket ${paket}`;
             document.getElementById('labelKosongkanPaket').innerText = `Paket ${paket}`;
             document.getElementById('labelTombolTambah').innerText = `(Paket ${paket})`;
+            document.getElementById('labelTombolPrint').innerText = `(Paket ${paket})`;
             
             document.getElementById('searchInput').value = "";
             renderTable();
         }
 
-        // Render Data ke Tabel Utama sesuai paket aktif
         function renderTable(dataToRender = dataSistem[paketAktif]) {
             const tableBody = document.getElementById('ijazahTableBody');
             const emptyState = document.getElementById('emptyState');
@@ -355,11 +313,8 @@
                             ${siswa.file || 'Terarsip'}
                         </span>
                     </td>
-                    <td class="py-4 px-4 text-center">
+                    <td class="py-4 px-4 text-center action-cell">
                         <div class="flex items-center justify-center gap-2">
-                            <button onclick="printOut(${siswa.id})" class="text-blue-600 hover:text-blue-800 p-1 cursor-pointer" title="Cetak Surat Bukti">
-                                <i class="fa-solid fa-print"></i>
-                            </button>
                             <button onclick="openEditModal(${siswa.id})" class="text-amber-600 hover:text-amber-800 p-1 cursor-pointer" title="Ubah Data">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
@@ -373,7 +328,6 @@
             });
         }
 
-        // Preview Pas Foto Di Form Modal
         function previewFoto(input) {
             const preview = document.getElementById('fotoPreview');
             const icon = document.getElementById('fotoIcon');
@@ -391,7 +345,6 @@
             }
         }
 
-        // Fungsi Khusus untuk Mengosongkan/Meriset Seluruh Isi Form Input
         function clearForm() {
             document.getElementById('ijazahForm').reset();
             fileTerpilihNama = "";
@@ -402,7 +355,6 @@
             document.getElementById('fileNameDisplay').classList.add('hidden');
         }
 
-        // Kosongkan Data Memori Lokal & Refresh Tampilan Tabel pada paket aktif
         function kosongkanDanRefreshSistem() {
             if (confirm(`PERINGATAN: Apakah Anda yakin ingin mengosongkan seluruh data arsip aktif untuk PROGRAM PAKET ${paketAktif}?\n\n(Data Paket lainnya tidak akan terhapus).`)) {
                 dataSistem[paketAktif] = [];
@@ -457,11 +409,23 @@
             document.getElementById('crudModal').classList.remove('hidden');
         }
 
+        // Fungsi mencetak seluruh tabel aktif
+        function printAllData() {
+            if (dataSistem[paketAktif].length === 0) {
+                alert(`Tidak ada data arsip Paket ${paketAktif} untuk dicetak.`);
+                return;
+            }
+            document.body.classList.add('print-all-mode');
+            window.print();
+            setTimeout(() => {
+                document.body.classList.remove('print-all-mode');
+            }, 500);
+        }
+
         function closeModal() {
             document.getElementById('crudModal').classList.add('hidden');
         }
 
-        // Update display nama file bukti fisik saat dipilih
         function updateFileName(input) {
             const display = document.getElementById('fileNameDisplay');
             if (input.files.length > 0) {
@@ -471,7 +435,6 @@
             }
         }
 
-        // Simpan Data Form ke paket aktif
         document.getElementById('ijazahForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const idForm = document.getElementById('editId').value;
@@ -525,7 +488,6 @@
             }
         }
 
-        // Fitur Pencarian Dinamis sesuai Paket Aktif
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const val = e.target.value.toLowerCase();
             const filtered = dataSistem[paketAktif].filter(s => s.nama.toLowerCase().includes(val) || s.nisn.includes(val));
@@ -536,29 +498,6 @@
             localStorage.setItem(`arsip_ijazah_paket_${paketAktif}`, JSON.stringify(dataSistem[paketAktif]));
         }
 
-        // Fitur Cetak Bukti Pengambilan Surat
-        function printOut(id) {
-            const siswa = dataSistem[paketAktif].find(d => d.id === id);
-            if (!siswa) return;
-
-            document.getElementById('p_paket').innerText = `PROGRAM PAKET ${paketAktif}`;
-            document.getElementById('p_nisn').innerText = siswa.nisn;
-            document.getElementById('p_nama').innerText = siswa.nama;
-            document.getElementById('p_ttl').innerText = `${siswa.tempatLahir || '-'}, ${formatTanggalSaja(siswa.tglLahir)}`;
-            document.getElementById('p_alamat').innerText = siswa.alamat;
-            document.getElementById('p_tahun').innerText = siswa.tahun;
-            document.getElementById('p_waktu').innerText = formatHariTanggal(siswa.tglAmbil);
-            document.getElementById('p_kontak').innerText = siswa.kontak;
-            document.getElementById('p_file').innerText = siswa.file;
-            document.getElementById('p_foto').src = siswa.foto || defaultFotoPlaceholder;
-            
-            const hariIni = new Date();
-            document.getElementById('p_tgl_ttd').innerText = `Sumedang, ${hariIni.getDate()} ${["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"][hariIni.getMonth()]} ${hariIni.getFullYear()}`;
-
-            window.print();
-        }
-
-        // Backup data JSON per kategori paket yang sedang dibuka
         function backupDataJSON() {
             if (dataSistem[paketAktif].length === 0) {
                 alert(`Tidak ada data arsip Paket ${paketAktif} untuk dibackup.`);
@@ -573,7 +512,6 @@
             downloadAnchor.remove();
         }
 
-        // Import data JSON dimasukkan ke dalam paket aktif saat ini
         function importDataJSON(input) {
             const file = input.files[0];
             if (!file) return;
@@ -616,7 +554,6 @@
             reader.readAsText(file);
         }
 
-        // Jalankan render awal saat program dimuat
         renderTable();
     </script>
 </body>
